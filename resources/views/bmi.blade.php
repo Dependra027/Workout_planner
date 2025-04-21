@@ -53,6 +53,14 @@
                             </select>
                         </div>
                         <div class="mb-3">
+                            <label for="weightDiet" class="form-label">Weight (kg)</label>
+                            <input type="number" class="form-control" id="weightDiet" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="heightDiet" class="form-label">Height (cm)</label>
+                            <input type="number" class="form-control" id="heightDiet" required>
+                        </div>
+                        <div class="mb-3">
                             <label for="activityLevel" class="form-label">Activity Level</label>
                             <select class="form-select" id="activityLevel" required>
                                 <option value="sedentary">Sedentary</option>
@@ -158,19 +166,18 @@
     </div>
 </div>
 
-@section('scripts')
 <script>
     // BMI Calculator
     document.getElementById("bmiForm").addEventListener("submit", function(e) {
         e.preventDefault();
         var weight = parseFloat(document.getElementById("weight").value);
-        var height = parseFloat(document.getElementById("height").value) / 100; // cm to meters
+        var height = parseFloat(document.getElementById("height").value) / 100;
         var bmi = weight / (height * height);
         var category = "";
 
         if (bmi < 18.5) category = "Underweight";
-        else if (bmi >= 18.5 && bmi <= 24.9) category = "Normal weight";
-        else if (bmi >= 25 && bmi <= 29.9) category = "Overweight";
+        else if (bmi <= 24.9) category = "Normal weight";
+        else if (bmi <= 29.9) category = "Overweight";
         else category = "Obesity";
 
         document.getElementById("bmiResult").innerText = bmi.toFixed(2);
@@ -182,34 +189,22 @@
         e.preventDefault();
         var age = parseInt(document.getElementById("age").value);
         var gender = document.getElementById("gender").value;
+        var weight = parseFloat(document.getElementById("weightDiet").value);
+        var height = parseFloat(document.getElementById("heightDiet").value);
         var activityLevel = document.getElementById("activityLevel").value;
 
-        var weight = parseFloat(document.getElementById("weightTdee").value);
-        var height = parseFloat(document.getElementById("heightTdee").value);
+        var bmr = gender === "male"
+            ? 10 * weight + 6.25 * height - 5 * age + 5
+            : 10 * weight + 6.25 * height - 5 * age - 161;
 
-        var bmr = 0;
-        if (gender === "male") {
-            bmr = 10 * weight + 6.25 * height - 5 * age + 5;
-        } else {
-            bmr = 10 * weight + 6.25 * height - 5 * age - 161;
-        }
+        var multiplier = {
+            sedentary: 1.2,
+            light: 1.375,
+            moderate: 1.55,
+            intense: 1.725
+        };
 
-        var tdee = 0;
-        switch (activityLevel) {
-            case "sedentary":
-                tdee = bmr * 1.2;
-                break;
-            case "light":
-                tdee = bmr * 1.375;
-                break;
-            case "moderate":
-                tdee = bmr * 1.55;
-                break;
-            case "intense":
-                tdee = bmr * 1.725;
-                break;
-        }
-
+        var tdee = bmr * multiplier[activityLevel];
         document.getElementById("dietResult").innerText = tdee.toFixed(0);
     });
 
@@ -217,8 +212,28 @@
     document.getElementById("waterForm").addEventListener("submit", function(e) {
         e.preventDefault();
         var weight = parseFloat(document.getElementById("weightWater").value);
-        var waterIntake = weight * 0.033; // recommended water intake (liters)
+        var waterIntake = weight * 0.033;
         document.getElementById("waterResult").innerText = waterIntake.toFixed(2);
+    });
+
+    // TDEE Calculator
+    document.getElementById("tdeeForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        var weight = parseFloat(document.getElementById("weightTdee").value);
+        var height = parseFloat(document.getElementById("heightTdee").value);
+        var age = parseInt(document.getElementById("ageTdee").value);
+        var activityLevel = document.getElementById("activityLevelTdee").value;
+
+        var bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+        var multiplier = {
+            sedentary: 1.2,
+            light: 1.375,
+            moderate: 1.55,
+            intense: 1.725
+        };
+
+        var tdee = bmr * multiplier[activityLevel];
+        document.getElementById("tdeeResult").innerText = tdee.toFixed(0);
     });
 
     // Workout Split Generator
@@ -242,5 +257,5 @@
         document.getElementById("workoutResult").innerText = workoutSplit;
     });
 </script>
-@endsection
+
 @endsection
